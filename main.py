@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
+from flask_swagger_ui import get_swaggerui_blueprint
 from blockchain import Blockchain
 from textwrap import dedent
 from uuid import uuid4
@@ -11,6 +12,15 @@ node_id = str(uuid4()).replace('-', '')
 
 #Instatiate the Blockchain
 blockchain = Blockchain()
+
+SWAGGER_URL = '/api/docs'
+API_URL = '/static/openapi.yaml'
+
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL, 
+    API_URL
+    )
+app.register_blueprint(swaggerui_blueprint)
 
 @app.route('/mine', methods=['GET'])
 def mine():
@@ -92,9 +102,15 @@ def consensus():
         }
     return jsonify(response), 200
 
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
+
+
+
 @app.route('/', methods=['GET'])
 def main():
-    return "Hello from beginner-blockchain!"
+    return "Hello from beginner-blockchain!", 200
 
 
 if __name__ == "__main__":

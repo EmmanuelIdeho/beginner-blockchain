@@ -1,0 +1,77 @@
+openapi: 3.0.0
+
+info:
+  title: Blockchain API
+  description: A simple blockchain built in Python
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:5000
+
+paths: 
+    /:
+      get:
+        summary: Say hello
+        description: Confirms that the api is working by saying hello
+        responses:
+          '200':
+            description: Successfly said hello
+    /mine:
+      get:
+        summary: Mine a new block
+        description: Mines a new block and adds it to the chain
+        responses:
+          '200':
+            description: Successfully mined a new block
+    /chain:
+      get:
+        summary: List the chain
+        description: Outputs the list of all the blocks on this blockchain
+        responses:
+          '200':
+            description: Successfully listed the blocks
+    /nodes/resolve:
+      get:
+        summary: Resolve the chains
+        description: Resolves all nodes so that the chain that's preserved is the largest one
+        responses:
+          '200':
+            description: Successfully resolved the nodes
+    /transactions/new:
+      post:
+        summary: Create a new transaction
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sender:
+                    type: string
+                  recipient:
+                    type: string
+                  amount:
+                    type: number
+        responses:
+          '201':
+            description: Transaction successfully created
+    /nodes/register:
+      post:
+        summary: Register a new node
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  nodes:
+                    type: array
+                    items:
+                      type: string
+        responses:
+          '201':
+            description: Successfully registered a new node
+
+    
