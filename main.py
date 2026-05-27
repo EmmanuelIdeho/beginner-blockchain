@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from blockchain import Blockchain
+from wallet import deserialize_public_key, verify_transaction
 from textwrap import dedent
 from uuid import uuid4
 
@@ -53,13 +54,22 @@ def mine():
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
-    required = ['sender', 'recipient', 'amount']
+    required = ['sender', 'recipient', 'amount', 'public_key', 'signature']
     if not all(k in values for k in required):
         return "You're missing some values", 400
     
+    actual_key = deserialize_public_key(values['public_key'])
+    
+    transaction_dict = {
+        'sender':values['sender'],
+        'recipient':values['recipient'],
+        'amount':values['amount'],
+    }
+    if not verify_transaction(actual_key, transaction_dict, values['signature']):
+        return jsonify({'message': 'Invalid signature, transaction rejected'}), 400
+    
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
-    response = {'message': f'Transaction will be added to Block {index}'}
-    return jsonify(response), 201
+    return jsonify({'message': f'Transaction will be added to Block {index}'}), 201
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
