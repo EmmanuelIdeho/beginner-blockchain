@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from blockchain import Blockchain
 from wallet import deserialize_public_key, verify_transaction
-from textwrap import dedent
 from uuid import uuid4
 
 #Instantiate a Node
@@ -54,6 +53,9 @@ def mine():
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
+    if not values:
+        return "Missing or invalid JSON body", 400
+    
     required = ['sender', 'recipient', 'amount', 'public_key', 'signature']
     if not all(k in values for k in required):
         return "You're missing some values", 400
@@ -119,13 +121,12 @@ def send_static(path):
 
 
 @app.route('/', methods=['GET'])
-def main():
+def index():
     return "Hello from beginner-blockchain!", 200
 
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
-    main()
     parser = ArgumentParser()
     parser.add_argument('-p', '--port', default=5000, type=int)
     args = parser.parse_args()

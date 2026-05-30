@@ -82,7 +82,10 @@ class Blockchain(object):
 
     def register_node(self, address):
         parsed_url = urlparse(address)
-        self.nodes.add(parsed_url.netloc)
+        node = parsed_url.netloc or parsed_url.path 
+        if not node:
+            raise ValueError(f"Invalid node address: {address}")
+        self.nodes.add(node)
 
     def valid_chain(self, chain):
         last_block = chain[0]
@@ -116,8 +119,9 @@ class Blockchain(object):
         for node in neighbours:
             response = requests.get(f'http://{node}/chain')
             if response.status_code == 200:
-                length = response.json()['length']
-                chain = response.json()['chain']
+                data = response.json()
+                length = data['length']
+                chain = data['chain']
 
                 # Check if the length is longer and the chain is valid
                 if length > max_length and self.valid_chain(chain):
